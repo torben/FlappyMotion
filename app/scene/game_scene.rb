@@ -9,8 +9,6 @@ class GameScene < SKScene
   end
 
   def init_scene
-    @game_stopped = false
-
     setup_ground
     setup_skyline
     setup_pipes
@@ -90,9 +88,10 @@ class GameScene < SKScene
     
     pipe_up.physicsBody = SKPhysicsBody.bodyWithRectangleOfSize pipe_up.size
     pipe_up.physicsBody.dynamic = false
-    pipe_pair.addChild pipe_up
 
+    pipe_pair.addChild pipe_up
     pipe_pair.runAction move_pipes_and_remove
+
     addChild pipe_pair
   end
 
@@ -145,6 +144,7 @@ class GameScene < SKScene
     removeActionForKey "pipes"
 
     after 0.5 do
+      @game_stopped = false
       init_scene
     end
   end
@@ -174,7 +174,7 @@ class GameScene < SKScene
 
   def after(time, &block)
     # block.weak!
-    queue  = Dispatch::Queue.current
+    queue = Dispatch::Queue.current
     timer = Dispatch::Source.timer(time, Dispatch::TIME_FOREVER, 0.0, queue) do |src|
       begin
         block.call
