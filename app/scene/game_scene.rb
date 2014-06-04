@@ -61,7 +61,7 @@ class GameScene < SKScene
     delay = SKAction.waitForDuration 4.0
     spawn_then_delay = SKAction.sequence([spawn, delay])
     spawn_then_delay_forever = SKAction.repeatActionForever spawn_then_delay
-    runAction spawn_then_delay_forever, withKey: "pipes"
+    runAction(spawn_then_delay_forever, withKey: "pipes")
   end
 
   def bird
@@ -117,11 +117,11 @@ class GameScene < SKScene
   end
 
   def pipe_texture_up
-    texture_for("pipe_up")
+    texture_for "pipe_up"
   end
 
   def pipe_texture_down
-    texture_for("pipe_down")
+    texture_for "pipe_down"
   end
 
   def ground_texture
@@ -183,5 +183,4 @@ class GameScene < SKScene
       end
     end
   end
-
 end
