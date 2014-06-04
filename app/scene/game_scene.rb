@@ -6,7 +6,7 @@ class GameScene < SKScene
     archiver = NSKeyedUnarchiver.alloc.initForReadingWithData scene_data
 
     archiver.setClass(classForKeyedUnarchiver, forClassName: "SKScene")
-    scene = archiver.decodeObjectForKey(NSKeyedArchiveRootObjectKey)
+    scene = archiver.decodeObjectForKey NSKeyedArchiveRootObjectKey
     archiver.finishDecoding
 
     scene
