@@ -2,8 +2,7 @@ class GameViewController < UIViewController
   def viewDidLoad
     super
 
-    scene = GameScene.sceneWithSize view.frame.size#GameScene.unarchive_from_file "GameScene"
-    # scene.scaleMode = SKSceneScaleModeAspectFill
+    scene = GameScene.sceneWithSize view.frame.size
 
     self.view = sk_view
     sk_view.presentScene scene
@@ -15,7 +14,7 @@ class GameViewController < UIViewController
       sk_view = SKView.alloc.initWithFrame view.frame
       sk_view.showsFPS = true
       sk_view.showsNodeCount = true
-      # sk_view.ignoresSiblingOrder = true
+      sk_view.ignoresSiblingOrder = true
 
       sk_view
     end

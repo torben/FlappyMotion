@@ -13,4 +13,6 @@ Motion::Project::App.setup do |app|
   app.name = 'flappy_bird'
 
   app.frameworks = %w(CoreGraphics AVFoundation UIKit QuartzCore SpriteKit Foundation)
+
+  app.interface_orientations = [:portrait]
 end

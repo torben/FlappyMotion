@@ -1,25 +1,18 @@
 class GameScene < SKScene
-  def self.unarchive_from_file(file)
-    path = NSBundle.mainBundle.pathForResource(file, ofType: "sks")
-
-    scene_data = NSData.dataWithContentsOfFile(path, options: NSDataReadingMappedIfSafe, error: nil)
-    archiver = NSKeyedUnarchiver.alloc.initForReadingWithData scene_data
-
-    archiver.setClass(classForKeyedUnarchiver, forClassName: "SKScene")
-    scene = archiver.decodeObjectForKey NSKeyedArchiveRootObjectKey
-    archiver.finishDecoding
-
-    scene
-  end
-
   def didMoveToView(view)
     self.physicsWorld.gravity = CGVectorMake(0.0, -5.0)
-    
     self.backgroundColor = UIColor.colorWithRed(81.0/255.0, green: 192.0/255.0, blue: 201.0/255.0, alpha: 1.0)
     
-    ground_texture = SKTexture.textureWithImageNamed "land"
-    ground_texture.filteringMode = SKTextureFilteringNearest
+    setup_ground
+    setup_skyline
+    setup_pipes
+    setup_ground
 
+    bird.position = [size.width * 0.35, size.height * 0.6]
+    addChild bird
+  end
+
+  def setup_ground
     move_ground_sprite = SKAction.moveByX(-ground_texture.size.width, y: 0, duration: 0.02 * ground_texture.size.width)
     reset_ground_sprite = SKAction.moveByX(ground_texture.size.width, y: 0, duration: 0.0)
     move_ground_sprites_forever = SKAction.repeatActionForever(SKAction.sequence([move_ground_sprite, reset_ground_sprite]))
@@ -31,11 +24,16 @@ class GameScene < SKScene
       sprite.runAction move_ground_sprites_forever
       addChild sprite
     end
-    
-    # skyline
-    sky_texture = SKTexture.textureWithImageNamed "sky"
-    sky_texture.filteringMode = SKTextureFilteringNearest
 
+    ground = SKNode.new
+    ground.position = [0, ground_texture.size.height / 2]
+    ground.physicsBody = SKPhysicsBody.bodyWithRectangleOfSize [size.width, ground_texture.size.height]
+    ground.physicsBody.dynamic = false
+
+    addChild ground
+  end
+
+  def setup_skyline
     move_sky_sprite = SKAction.moveByX(-sky_texture.size.width, y: 0, duration: 0.1 * sky_texture.size.width)
     reset_sky_sprite = SKAction.moveByX(sky_texture.size.width, y: 0, duration: 0.0)
     move_skype_sprites_forever = SKAction.repeatActionForever(SKAction.sequence([move_sky_sprite, reset_sky_sprite]))
@@ -48,41 +46,18 @@ class GameScene < SKScene
       sprite.runAction move_skype_sprites_forever
       addChild sprite
     end
-    
-    # spawn the pipes
+  end
+
+  def setup_pipes
     spawn = SKAction.runBlock -> { spawn_pipes }
     delay = SKAction.waitForDuration 4.0
     spawn_then_delay = SKAction.sequence([spawn, delay])
     spawn_then_delay_forever = SKAction.repeatActionForever spawn_then_delay
     runAction spawn_then_delay_forever
-    
-    # setup our bird
-    animation = SKAction.animateWithTextures([texture_for("bird-01"), texture_for("bird-02")], timePerFrame: 0.2)
-    flap = SKAction.repeatActionForever animation
-
-    bird.position = [size.width * 0.35, size.height * 0.6]
-    bird.runAction flap
-    addChild bird
-    
-    # create the ground
-    puts ground_texture.size.height
-    ground = SKNode.new
-    ground.position = [0, ground_texture.size.height / 2]
-    ground.physicsBody = SKPhysicsBody.bodyWithRectangleOfSize [size.width, ground_texture.size.height / 2]
-    ground.physicsBody.dynamic = false
-
-    addChild ground
   end
 
   def bird
-    @bird ||= begin
-      bird = SKSpriteNode.spriteNodeWithTexture texture_for "bird-01"
-
-      bird.physicsBody = SKPhysicsBody.bodyWithCircleOfRadius bird.size.height
-      bird.physicsBody.dynamic = true
-      bird.physicsBody.allowsRotation = false
-      bird
-    end
+    @bird ||= BirdNode.new
   end
 
   def spawn_pipes
@@ -91,7 +66,7 @@ class GameScene < SKScene
     pipe_pair.zPosition = -10
 
     height = size.height / 4
-    y = rand(40) - 20 % height + height
+    y = rand(60) - 20 % height + height
     
     pipe_down = SKSpriteNode.alloc.initWithTexture pipe_texture_down
     pipe_down.position = [0, y + pipe_down.size.height + vertical_pipe_gap]
@@ -140,12 +115,20 @@ class GameScene < SKScene
     texture_for("pipe_down")
   end
 
+  def ground_texture
+    texture_for "land"
+  end
+
+  def sky_texture
+    texture_for "sky"
+  end
+
   def touchesBegan(touches, withEvent: event)
     touches.each do |touch|
       location = touch.locationInNode self
 
       bird.physicsBody.velocity = CGVectorMake(0, 0)
-      bird.physicsBody.applyImpulse(CGVectorMake(0, 60))
+      bird.physicsBody.applyImpulse(CGVectorMake(0, 20))
     end
   end
     
