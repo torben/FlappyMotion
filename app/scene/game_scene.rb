@@ -1,14 +1,23 @@
 class GameScene < SKScene
   def didMoveToView(view)
-    self.physicsWorld.gravity = CGVectorMake(0.0, -5.0)
+    physicsWorld.gravity = CGVectorMake(0.0, -5.0)
+    physicsWorld.contactDelegate = self
+
     self.backgroundColor = UIColor.colorWithRed(81.0/255.0, green: 192.0/255.0, blue: 201.0/255.0, alpha: 1.0)
-    
+
+    init_scene
+  end
+
+  def init_scene
+    @game_stopped = false
+
     setup_ground
     setup_skyline
     setup_pipes
     setup_ground
 
     bird.position = [size.width * 0.35, size.height * 0.6]
+
     addChild bird
   end
 
@@ -29,6 +38,7 @@ class GameScene < SKScene
     ground.position = [0, ground_texture.size.height / 2]
     ground.physicsBody = SKPhysicsBody.bodyWithRectangleOfSize [size.width, ground_texture.size.height]
     ground.physicsBody.dynamic = false
+    ground.physicsBody.usesPreciseCollisionDetection = true
 
     addChild ground
   end
@@ -53,7 +63,7 @@ class GameScene < SKScene
     delay = SKAction.waitForDuration 4.0
     spawn_then_delay = SKAction.sequence([spawn, delay])
     spawn_then_delay_forever = SKAction.repeatActionForever spawn_then_delay
-    runAction spawn_then_delay_forever
+    runAction spawn_then_delay_forever, withKey: "pipes"
   end
 
   def bird
@@ -123,6 +133,22 @@ class GameScene < SKScene
     texture_for "sky"
   end
 
+  def didBeginContact(contact)
+    return if @game_stopped == true
+    @game_stopped = true
+
+    children.each do |child|
+      child.removeFromParent
+    end
+    @bird = nil
+
+    removeActionForKey "pipes"
+
+    after 0.5 do
+      init_scene
+    end
+  end
+
   def touchesBegan(touches, withEvent: event)
     touches.each do |touch|
       location = touch.locationInNode self
@@ -145,4 +171,17 @@ class GameScene < SKScene
   def update(currentTime)
     bird.zRotation = clamp(-1, 0.5, bird.physicsBody.velocity.dy * (bird.physicsBody.velocity.dy < 0 ? 0.003 : 0.001 ))
   end
+
+  def after(time, &block)
+    # block.weak!
+    queue  = Dispatch::Queue.current
+    timer = Dispatch::Source.timer(time, Dispatch::TIME_FOREVER, 0.0, queue) do |src|
+      begin
+        block.call
+      ensure
+        src.cancel!
+      end
+    end
+  end
+
 end

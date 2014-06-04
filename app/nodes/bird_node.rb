@@ -11,6 +11,10 @@ class BirdNode < SKSpriteNode
     self.physicsBody = SKPhysicsBody.bodyWithCircleOfRadius size.height / 2
     physicsBody.dynamic = true
     physicsBody.allowsRotation = false
+    physicsBody.usesPreciseCollisionDetection = true
+    physicsBody.collisionBitMask = 1
+    physicsBody.contactTestBitMask = 1
+    physicsBody.categoryBitMask = 1
 
     animation = SKAction.animateWithTextures([texture_for("bird-01"), texture_for("bird-02")], timePerFrame: 0.2)
     runAction SKAction.repeatActionForever animation
