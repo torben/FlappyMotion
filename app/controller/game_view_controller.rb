@@ -2,11 +2,11 @@ class GameViewController < UIViewController
   def viewDidLoad
     super
 
-    scene = GameScene.unarchive_from_file "GameScene"
-    scene.scaleMode = SKSceneScaleModeAspectFill
-    sk_view.presentScene scene
+    scene = GameScene.sceneWithSize view.frame.size#GameScene.unarchive_from_file "GameScene"
+    # scene.scaleMode = SKSceneScaleModeAspectFill
 
-    view.addSubview sk_view
+    self.view = sk_view
+    sk_view.presentScene scene
   end
 
   # Views
